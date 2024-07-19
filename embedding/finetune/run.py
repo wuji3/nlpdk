@@ -15,7 +15,6 @@ from .modeling import BiEncoderModel
 from .trainer import BiTrainer
 import datetime
 import pytz
-import shutil
 
 logger = logging.getLogger(__name__)
 
@@ -30,7 +29,6 @@ def main():
     sh = pytz.timezone('Asia/Shanghai')
     training_args.output_dir = os.path.join(training_args.output_dir, datetime.datetime.now(sh).strftime("%Y-%m-%d-%H-%M-%S"))
     os.makedirs(training_args.output_dir, exist_ok=True)
-    shutil.copy('./run_duke_sft.sh', training_args.output_dir)
 
     if (
             os.path.exists(training_args.output_dir)

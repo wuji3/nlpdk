@@ -3,7 +3,7 @@
 CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7
 torchrun --nproc_per_node 8 \
 -m finetune.run \
---output_dir ./embedding-sft-output1  \
+--output_dir ./embedding-sft-output \
 --model_name_or_path BAAI/bge-large-en-v1.5 \
 --train_data shoppal/embedding-index \
 --sub_data_name source2.3 \
