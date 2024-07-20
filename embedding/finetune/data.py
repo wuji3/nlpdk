@@ -17,6 +17,7 @@ class TrainDatasetForEmbedding(Dataset):
             args: DataArguments,
             tokenizer: PreTrainedTokenizer
     ):
+        # local data directory containint jsonl files
         if os.path.isdir(args.train_data):
             train_datasets = []
             for file in os.listdir(args.train_data):
@@ -27,8 +28,10 @@ class TrainDatasetForEmbedding(Dataset):
                         random.sample(list(range(len(temp_dataset))), args.max_example_num_per_dataset))
                 train_datasets.append(temp_dataset)
             self.dataset = datasets.concatenate_datasets(train_datasets)
+        # huggingface hub dataset
         elif args.sub_data_name is not None:
             self.dataset = datasets.load_dataset(args.train_data, name=args.sub_data_name, split='train')
+        # local data json file
         else:
             self.dataset = datasets.load_dataset('json', data_files=args.train_data, split='train')
 

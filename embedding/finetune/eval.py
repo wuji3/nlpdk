@@ -86,9 +86,9 @@ class Args:
         metadata={'help': 'candidate passages'}
     )
 
-    corpus_data_name: str = field(
-        default="namespace-Pt/msmarco",
-        metadata={'help': 'candidate passages'}
+    corpus_data_name: Optional[str] = field(
+        default=None,
+        metadata={'help': 'dataset name'}
     )
 
     query_data: str = field(
@@ -96,9 +96,9 @@ class Args:
         metadata={'help': 'queries and their positive passages for evaluation'}
     )
     
-    query_data_name: str = field(
-        default="namespace-Pt/msmarco-corpus",
-        metadata={'help': 'queries and their positive passages for evaluation'}
+    query_data_name: Optional[str] = field(
+        default=None,
+        metadata={'help': 'dataset name'}
     )
 
     split: str = field(
@@ -300,11 +300,14 @@ def main():
         assert args.corpus_data == 'namespace-Pt/msmarco'
         eval_data = datasets.load_dataset("namespace-Pt/msmarco", split="dev")
         corpus = datasets.load_dataset("namespace-Pt/msmarco-corpus", split="train")
-    else:
-        #eval_data = datasets.load_dataset('json', data_files=args.query_data, split='train')
-        #corpus = datasets.load_dataset('json', data_files=args.corpus_data, split='train')
+    # Huggingface Dataset
+    elif args.query_data_name is not None and args.corpus_data_name is not None:
         eval_data = datasets.load_dataset(path = args.query_data, name= args.query_data_name, split = args.split).remove_columns(['neg']).rename_column('pos', 'positive')
         corpus = datasets.load_dataset(path = args.corpus_data, name = args.corpus_data_name, split = args.split)
+    # Local Dataset
+    else:
+        eval_data = datasets.load_dataset('json', data_files=args.query_data, split='train')
+        corpus = datasets.load_dataset('json', data_files=args.corpus_data, split='train')
     
     logger(args)
 

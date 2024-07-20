@@ -39,7 +39,7 @@ from transformers.utils import check_min_version, send_example_telemetry
 from transformers.utils.versions import require_version
 
 from utils.args import ModelArguments, DataTrainingArguments, TrainingArgumentDK
-from engine.trainer import NLPTrainer
+from engine.trainer import TagTrainer
 
 require_version("datasets>=1.8.0", "To fix: pip install -r examples/pytorch/text-classification/requirements.txt")
 
@@ -105,21 +105,6 @@ def main():
 
     # Set seed before initializing model.
     set_seed(training_args.seed)
-
-    # Get the datasets: you can either provide your own CSV/JSON training and evaluation files (see below)
-    # or specify a GLUE benchmark task (the dataset will be downloaded automatically from the datasets Hub).
-    #
-    # For CSV/JSON files, this script will use as labels the column called 'label' and as pair of sentences the
-    # sentences in columns called 'sentence1' and 'sentence2' if such column exists or the first two columns not named
-    # label if at least two columns are provided.
-    #
-    # If the CSVs/JSONs contain only one non-label column, the script does single sentence classification on this
-    # single column. You can easily tweak this behavior (see below)
-    #
-    # In distributed training, the load_dataset function guarantee that only one local process can concurrently
-    # download the dataset.
-    # Loading a dataset from your local files.
-    # CSV/JSON training and evaluation files are needed.
 
     data_files = {"train": data_args.train_file}
 
@@ -254,7 +239,7 @@ def main():
         data_collator = None
 
     # Initialize our Trainer
-    trainer = NLPTrainer(
+    trainer = TagTrainer(
         model=model,
         args=training_args,
         train_dataset=train_dataset,
