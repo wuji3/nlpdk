@@ -1,4 +1,4 @@
-## <div align="center">LangDK: ToolBox Of Natural Language Tagging </div>
+## <div align="center">NLPDK: ToolBox Of Natural Language Tagging </div>
 
 
 ## What's New
