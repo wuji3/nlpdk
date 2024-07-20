@@ -1,4 +1,3 @@
-import os
 from dataclasses import dataclass, field
 from typing import Optional
 
@@ -28,11 +27,11 @@ class ModelArguments:
 
 @dataclass
 class DataArguments:
-    train_data: str = field(
+    train_data: Optional[str] = field(
         default=None, metadata={"help": "Path to train data"}
     )
 
-    sub_data_name: str = field(
+    sub_data_name: Optional[str] = field(
         default=None, metadata={"help": "Path to sub data"}
     )
 
@@ -58,10 +57,10 @@ class DataArguments:
         default=100000000, metadata={"help": "the max number of examples for each dataset"}
     )
 
-    query_instruction_for_retrieval: str= field(
+    query_instruction_for_retrieval: Optional[str]= field(
         default=None, metadata={"help": "instruction for query"}
     )
-    passage_instruction_for_retrieval: str = field(
+    passage_instruction_for_retrieval: Optional[str] = field(
         default=None, metadata={"help": "instruction for passage"}
     )
 
