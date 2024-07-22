@@ -25,6 +25,26 @@ pip install FlagEmbedding==1.2.9
     }
     ```
 
+## OHEM
+```bash
+python -m finetune.hn_mine \
+--model_name_or_path BAAI/bge-base-en-v1.5 \
+--input_file toy_finetune_data.jsonl \
+--output_file toy_finetune_data_minedHN.jsonl \
+--range_for_sampling 2-200 \
+--negative_number 15 \
+--use_gpu_for_searching 
+```
+
+- `input_file`: json data for finetuning. This script will retrieve top-k documents for each query, 
+and random sample negatives from the top-k documents (not including the positive documents).
+- `output_file`: path to save JSON data with mined hard negatives for finetuning
+- `negative_number`: the number of sampled negatives 
+- `range_for_sampling`: where to sample negative. For example, `2-100` means sampling `negative_number` negatives from top2-top200 documents. **You can set larger value to reduce the difficulty of negatives (e.g., set it `60-300` to sample negatives from top60-300 passages)**
+- `candidate_pool`: The pool to retrieval. The default value is None, and this script will retrieve from the combination of all `neg` in `input_file`. 
+The format of this file is the same as pretrain data which is jsonl {'text': str}. If input a candidate_pool, this script will retrieve negatives from this file.
+- `use_gpu_for_searching`: whether to use faiss-gpu to retrieve negatives.
+
 ## Training
 ### Local Data
 1. If a jsonl file
@@ -108,6 +128,12 @@ torchrun --nproc_per_node 8 \
 --save_steps 1000 \
 --query_instruction_for_retrieval "" 
 ```
+
+### Params Setting
+- `--per_device_train_batch_size`: set batch size of each gpu, total_batch_size = n_gpu x per_device_train_batch_size
+- `--normlized`: whether L2 norm in features
+- `--query_max_len`: max length of query setting
+- `--passage_max_len` 512: max length of passage setting
 
 ## Eval
 1. Huggingface Data
