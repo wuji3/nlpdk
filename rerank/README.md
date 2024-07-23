@@ -1,12 +1,13 @@
 ## Env Prepare
 ```shell
-conda create -n nlp-emb python=3.10
-conda activate nlp-emb
+conda create -n nlp-rerank python=3.10
+conda activate nlp-rerank
 
 conda install pytorch torchvision torchaudio pytorch-cuda=12.1 -c pytorch -c nvidia -y
 conda install -c pytorch faiss-gpu=1.8.0 -y
 conda install chardet=4.0.0 -y
 pip install FlagEmbedding==1.2.9
+pip install 
 ```
 
 ## Data Prepare
@@ -130,14 +131,10 @@ torchrun --nproc_per_node 8 \
 ```
 
 ### Params Setting
-- `negatives_cross_device`: equal to enlarge batch size in a more memory-freind way
-- `use_inbatch_neg`: using others negatives as self negatives
 - `--per_device_train_batch_size`: set batch size of each gpu, total_batch_size = n_gpu x per_device_train_batch_size
 - `--normlized`: whether L2 norm in features
 - `--query_max_len`: max length of query setting
 - `--passage_max_len` 512: max length of passage setting
-
-Note: set `negatives_cross_device` True and `use_inbatch_neg` True, equal to `n_gpus` x `batch_size_per_device` batch size in a more memory-freindly way. And in this way, every gpu batch is same. For each query, negative passage numbers is `negatives_cross_device` x `batch_size_per_device` x `n_gpus`
 
 ## Eval
 1. Huggingface Data

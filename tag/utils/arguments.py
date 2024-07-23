@@ -1,6 +1,7 @@
 from dataclasses import dataclass, field
 from typing import Optional
 from transformers import TrainingArguments
+import os
 
 @dataclass
 class DataTrainingArguments:
@@ -105,7 +106,7 @@ class TrainingArgumentDK(TrainingArguments):
     )
     # model save path
     output_dir: str = field(
-        default='/home/duke/nlpdk/test',
+        default=os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'tag_output'),
         metadata={"help": "The output directory where the model predictions and checkpoints will be written."},
     )
     # overwrite output dir

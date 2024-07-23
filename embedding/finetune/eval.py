@@ -12,7 +12,6 @@ from FlagEmbedding import FlagModel
 import logging
 from typing import Union
 import yaml
-import time
 
 class SmartLogger:
 

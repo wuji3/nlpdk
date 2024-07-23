@@ -38,7 +38,7 @@ from transformers.trainer_utils import get_last_checkpoint
 from transformers.utils import send_example_telemetry
 from transformers.utils.versions import require_version
 
-from utils.args import ModelArguments, DataTrainingArguments, TrainingArgumentDK
+from utils.arguments import ModelArguments, DataTrainingArguments, TrainingArgumentDK
 from engine.trainer import TagTrainer
 
 require_version("datasets>=1.8.0", "To fix: pip install -r examples/pytorch/text-classification/requirements.txt")
