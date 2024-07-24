@@ -1,17 +1,17 @@
 ## Env Prepare
 ```shell
-conda create -n nlp-rerank python=3.10
+conda create -n nlp-rerank python=3.10 -y
 conda activate nlp-rerank
 
 conda install pytorch torchvision torchaudio pytorch-cuda=12.1 -c pytorch -c nvidia -y
 conda install -c pytorch faiss-gpu=1.8.0 -y
 conda install chardet=4.0.0 -y
 pip install FlagEmbedding==1.2.9
-pip install 
+pip install sentencepiece==0.2.0
 ```
 
 ## Data Prepare
-1. Data For Training
+1. Data For Training Like [Embedding](../embedding/README.md)
     ```json
     {
         "query": "Do wireless headsets have static noise?", 
@@ -19,15 +19,10 @@ pip install
         "neg": ["Downloaded is None in fetch_url(https:\/\/www.simplyheadsets.com.au\/blog\/how-to-fix-static-coming-from-your-headset#:~:text=If%20you%20have%20a%20wireless,software%20is%20what's%20causing%20static.) function", "..."]
     }
     ```
-2. Corpus For Eval
-    ```json
-    {
-        "content": ["xxx", "xxx", "..."]
-    }
-    ```
 
 ## OHEM
 ```bash
+cd ../embedding & \
 python -m finetune.hn_mine \
 --model_name_or_path BAAI/bge-base-en-v1.5 \
 --input_file toy_finetune_data.jsonl \
@@ -53,127 +48,70 @@ The format of this file is the same as pretrain data which is jsonl {'text': str
     ```bash
     #! /bin/bash
 
-    CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7
-    torchrun --nproc_per_node 8 \
-    -m finetune.run \
-    --output_dir ./embedding-sft-output \
-    --model_name_or_path BAAI/bge-large-en-v1.5 \
-    --train_data  /home/duke/nlpdk/data/embedding/finetune/train_toy.jsonl \
-    --learning_rate 1e-5 \
-    --fp16 True \
-    --num_train_epochs 10 \
-    --per_device_train_batch_size 16 \
+    CUDA_VISIBLE_DEVICES=1,2,3,4,5,6,7 torchrun --nproc_per_node 7 run.py \
+    --model_name_or_path BAAI/bge-reranker-v2-m3 \
+    --train_data {realpath to jsonl file} \
+    --learning_rate 6e-5 \
+    --num_train_epochs 5 \
+    --per_device_train_batch_size 8 \
     --dataloader_drop_last True \
-    --normlized True \
-    --temperature 0.02 \
-    --query_max_len 512 \
-    --passage_max_len 512 \
-    --train_group_size 5 \
-    --negatives_cross_device True \
-    --use_inbatch_neg True \
-    --logging_steps 10 \
-    --save_steps 1000 \
-    --query_instruction_for_retrieval "" 
+    --train_group_size 4 \
+    --max_len 512 \
+    --weight_decay 0.01 \
+    --logging_steps 500 \
+    --save_steps 500 \
+    --overwrite_output_dir True \
     ```
 2. If some json files in xxx directory
 
     ```bash
     #! /bin/bash
 
-    CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7
-    torchrun --nproc_per_node 8 \
-    -m finetune.run \
-    --output_dir ./embedding-sft-output \
-    --model_name_or_path BAAI/bge-large-en-v1.5 \
-    --train_data  /home/duke/nlpdk/data/embedding/finetune/traindata \
-    --learning_rate 1e-5 \
-    --fp16 True \
-    --num_train_epochs 10 \
-    --per_device_train_batch_size 16 \
+    CUDA_VISIBLE_DEVICES=1,2,3,4,5,6,7 torchrun --nproc_per_node 7 run.py \
+    --model_name_or_path BAAI/bge-reranker-v2-m3 \
+    --train_data {realpath to jsonl dir} \
+    --learning_rate 6e-5 \
+    --num_train_epochs 5 \
+    --per_device_train_batch_size 8 \
     --dataloader_drop_last True \
-    --normlized True \
-    --temperature 0.02 \
-    --query_max_len 512 \
-    --passage_max_len 512 \
-    --train_group_size 5 \
-    --negatives_cross_device True \
-    --use_inbatch_neg True \
-    --logging_steps 10 \
-    --save_steps 1000 \
-    --query_instruction_for_retrieval "" 
+    --train_group_size 4 \
+    --max_len 512 \
+    --weight_decay 0.01 \
+    --logging_steps 500 \
+    --save_steps 500 \
+    --overwrite_output_dir True \
     ```
 ### Huggingface Data
-```bash
-#! /bin/bash
 
-CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7
-torchrun --nproc_per_node 8 \
--m finetune.run \
---output_dir ./embedding-sft-output \
---model_name_or_path BAAI/bge-large-en-v1.5 \
---train_data xxx/embedding-index \
---sub_data_name source2.3 \
---learning_rate 1e-5 \
---fp16 True \
---num_train_epochs 10 \
---per_device_train_batch_size 16 \
---dataloader_drop_last True \
---normlized True \
---temperature 0.02 \
---query_max_len 512 \
---passage_max_len 512 \
---train_group_size 5 \
---negatives_cross_device True \
---use_inbatch_neg True \
---logging_steps 10 \
---save_steps 1000 \
---query_instruction_for_retrieval "" 
-```
+    ```bash
+
+    CUDA_VISIBLE_DEVICES=1,2,3,4,5,6,7 torchrun --nproc_per_node 7 run.py \
+    --model_name_or_path BAAI/bge-reranker-v2-m3 \
+    --train_data shoppal/embedding-index \
+    --sub_data_name source2.3 \
+    --learning_rate 6e-5 \
+    --num_train_epochs 5 \
+    --per_device_train_batch_size 8 \
+    --dataloader_drop_last True \
+    --train_group_size 4 \
+    --max_len 513 \
+    --weight_decay 0.01 \
+    --logging_steps 500 \
+    --save_steps 500 \
+    --overwrite_output_dir True \
+    ```
 
 ### Params Setting
 - `--per_device_train_batch_size`: set batch size of each gpu, total_batch_size = n_gpu x per_device_train_batch_size
-- `--normlized`: whether L2 norm in features
-- `--query_max_len`: max length of query setting
-- `--passage_max_len` 512: max length of passage setting
+- `--max_len`: max length of passage setting, bge-reranker-v2-m3 support 8192 length.
 
 ## Eval
-1. Huggingface Data
-    ```bash
-    #! /bin/bash
 
-    python -m finetune.eval \
-    --encoder /home/duke/nlpdk/embedding/embedding-sft-output/2024-07-19-20-01-25 \
-    --fp16 \
-    --k 100 \
-    --corpus_data xxx/embedding-index \
-    --corpus_data_name source2.3-corpus \
-    --query_data xxx/embedding-index \
-    --query_data_name source2.3 \
-    --max_query_length 512 \
-    --max_passage_length 512 \
-    --split test \
-    --batch_size 6400 \
-    --roc_save_path '' 
-    ```
-2. Local Data
-
-    ```bash
-    #! /bin/bash
-
-    python -m finetune.eval \
-    --encoder /home/xxx/nlpdk/embedding/embedding-sft-output/2024-07-19-20-01-25 \
-    --fp16 \
-    --k 100 \
-    --corpus_data /home/duke/nlpdk/data/embedding/finetune/train_toy.jsonl \
-    --query_data /home/duke/nlpdk/data/embedding/finetune/corpus_toy.jsonl \
-    --max_query_length 512 \
-    --max_passage_length 512 \
-    --split test \
-    --batch_size 6400 \
-    --roc_save_path '' 
-    ```
-
-## Infer
 ```python
-python finetune/predict.py
+python eval.py -m xxx -d {dir or file or huggingface} {-sd (if huggingface and has sub_data_name)}
+
+```
+## Infer
+```markdown
+Refer to eval.py
 ```

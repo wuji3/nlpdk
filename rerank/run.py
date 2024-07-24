@@ -75,7 +75,6 @@ def main():
         cache_dir=model_args.cache_dir,
     )
 
-    print(training_args.fp)
     train_dataset = TrainDatasetForCE(data_args, tokenizer=tokenizer)
     _trainer_class = CETrainer
     trainer = _trainer_class(

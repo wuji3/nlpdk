@@ -5,10 +5,6 @@ import os
 from typing import Optional
 from sklearn.metrics import precision_score, recall_score, f1_score, roc_auc_score
 
-# reranker = FlagReranker('', use_fp16=True) # Setting use_fp16 to True speeds up computation with a slight performance degradation
-
-# You can map the scores into 0-1 by set "normalize=True", which will apply sigmoid function to the score
-
 def parse_args():
     args = argparse.ArgumentParser()
     args.add_argument('-m', '--model_name_or_path', type=str, default='/home/duke/nlpdk/rerank/rerank_output')
@@ -19,7 +15,7 @@ def parse_args():
 
 def main(args):
     # for debugging
-    args.sub_data_name = 'source2.3'
+    # args.sub_data_name = 'source2.3'
 
     reranker = FlagReranker(args.model_name_or_path, use_fp16=True) # Setting use_fp16 to True speeds up computation with a slight performance degradation
     if os.path.isdir(args.data):
