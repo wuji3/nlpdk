@@ -8,6 +8,8 @@ conda install -c pytorch faiss-gpu=1.8.0 -y
 conda install chardet=4.0.0 -y
 pip install FlagEmbedding==1.2.9
 pip install sentencepiece==0.2.0
+pip install deepspeed==0.14.4
+pip install flash-attn==2.6.2 --no-build-isolation
 ```
 
 ## Data Prepare
@@ -46,62 +48,91 @@ The format of this file is the same as pretrain data which is jsonl {'text': str
 1. If a jsonl file
 
     ```bash
-    #! /bin/bash
-
-    CUDA_VISIBLE_DEVICES=1,2,3,4,5,6,7 torchrun --nproc_per_node 7 run.py \
-    --model_name_or_path BAAI/bge-reranker-v2-m3 \
-    --train_data {realpath to jsonl file} \
-    --learning_rate 6e-5 \
-    --num_train_epochs 5 \
-    --per_device_train_batch_size 8 \
+    CUDA_VISIBLE_DEVICES=1 torchrun --nproc_per_node 1 \
+    -m run \
+    --output_dir /home/duke/nlpdk/rerank/decoder-only/llm_reranker_output \
+    --model_name_or_path BAAI/bge-reranker-v2-gemma \
+    --train_data xxx \
+    --learning_rate 2e-4 \
+    --num_train_epochs 1 \
+    --per_device_train_batch_size 16 \
     --dataloader_drop_last True \
-    --train_group_size 4 \
-    --max_len 512 \
-    --weight_decay 0.01 \
-    --logging_steps 500 \
-    --save_steps 500 \
-    --overwrite_output_dir True \
+    --query_max_len 512 \
+    --passage_max_len 512 \
+    --train_group_size 16 \
+    --logging_steps 1 \
+    --save_steps 2000 \
+    --save_total_limit 50 \
+    --ddp_find_unused_parameters False \
+    --gradient_checkpointing \
+    --warmup_ratio 0.1 \
+    --bf16 \
+    --use_lora True \
+    --lora_rank 32 \
+    --lora_alpha 64 \
+    --use_flash_attn True \
+    --target_modules q_proj k_proj v_proj o_proj
     ```
 2. If some json files in xxx directory
 
     ```bash
-    #! /bin/bash
-
-    CUDA_VISIBLE_DEVICES=1,2,3,4,5,6,7 torchrun --nproc_per_node 7 run.py \
-    --model_name_or_path BAAI/bge-reranker-v2-m3 \
-    --train_data {realpath to jsonl dir} \
-    --learning_rate 6e-5 \
-    --num_train_epochs 5 \
-    --per_device_train_batch_size 8 \
+    CUDA_VISIBLE_DEVICES=1 torchrun --nproc_per_node 1 \
+    -m run \
+    --output_dir /home/duke/nlpdk/rerank/decoder-only/llm_reranker_output \
+    --model_name_or_path BAAI/bge-reranker-v2-gemma \
+    --train_data xxx \
+    --learning_rate 2e-4 \
+    --num_train_epochs 1 \
+    --per_device_train_batch_size 16 \
     --dataloader_drop_last True \
-    --train_group_size 4 \
-    --max_len 512 \
-    --weight_decay 0.01 \
-    --logging_steps 500 \
-    --save_steps 500 \
-    --overwrite_output_dir True \
+    --query_max_len 512 \
+    --passage_max_len 512 \
+    --train_group_size 16 \
+    --logging_steps 1 \
+    --save_steps 2000 \
+    --save_total_limit 50 \
+    --ddp_find_unused_parameters False \
+    --gradient_checkpointing \
+    --warmup_ratio 0.1 \
+    --bf16 \
+    --use_lora True \
+    --lora_rank 32 \
+    --lora_alpha 64 \
+    --use_flash_attn True \
+    --target_modules q_proj k_proj v_proj o_proj
     ```
 ### Huggingface Data
 
     ```bash
-
-    CUDA_VISIBLE_DEVICES=1,2,3,4,5,6,7 torchrun --nproc_per_node 7 run.py \
-    --model_name_or_path BAAI/bge-reranker-v2-m3 \
-    --train_data shoppal/embedding-index \
+    CUDA_VISIBLE_DEVICES=1 torchrun --nproc_per_node 1 \
+    -m run \
+    --output_dir /home/duke/nlpdk/rerank/decoder-only/llm_reranker_output \
+    --model_name_or_path BAAI/bge-reranker-v2-gemma \
+    --train_data xxx/embedding-index \
     --sub_data_name source2.3 \
-    --learning_rate 6e-5 \
-    --num_train_epochs 5 \
-    --per_device_train_batch_size 8 \
+    --learning_rate 2e-4 \
+    --num_train_epochs 1 \
+    --per_device_train_batch_size 16 \
     --dataloader_drop_last True \
-    --train_group_size 4 \
-    --max_len 513 \
-    --weight_decay 0.01 \
-    --logging_steps 500 \
-    --save_steps 500 \
-    --overwrite_output_dir True \
+    --query_max_len 512 \
+    --passage_max_len 512 \
+    --train_group_size 16 \
+    --logging_steps 1 \
+    --save_steps 2000 \
+    --save_total_limit 50 \
+    --ddp_find_unused_parameters False \
+    --gradient_checkpointing \
+    --warmup_ratio 0.1 \
+    --bf16 \
+    --use_lora True \
+    --lora_rank 32 \
+    --lora_alpha 64 \
+    --use_flash_attn True \
+    --target_modules q_proj k_proj v_proj o_proj
     ```
 
 ### Params Setting
+- `model_name_or_path`: set "BAAI/bge-reranker-v2-gemma", if want to train from scratch, set "google/gemma-2b" [Note: get access token first, https://huggingface.co/google/gemma-2b]
 - `--per_device_train_batch_size`: set batch size of each gpu, total_batch_size = n_gpu x per_device_train_batch_size
 - `--max_len`: max length of passage setting, bge-reranker-v2-m3 support 8192 length.
 
