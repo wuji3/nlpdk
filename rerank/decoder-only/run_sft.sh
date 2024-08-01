@@ -17,7 +17,7 @@ CUDA_VISIBLE_DEVICES=1 torchrun --nproc_per_node 1 \
 --ddp_find_unused_parameters False \
 --gradient_checkpointing \
 --warmup_ratio 0.1 \
---token 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 \
+--token xxxx \
 --bf16 \
 --use_lora True \
 --lora_rank 32 \
