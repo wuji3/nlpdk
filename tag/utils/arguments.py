@@ -1,6 +1,8 @@
 from dataclasses import dataclass, field
 from typing import Optional
 from transformers import TrainingArguments
+from transformers.trainer_utils import SchedulerType
+from typing import Union
 import os
 
 @dataclass
@@ -86,6 +88,15 @@ class TrainingArgumentDK(TrainingArguments):
     )
     # lr
     learning_rate: float = field(default=2e-5, metadata={"help": "The initial learning rate for AdamW."})
+    # lr scheduler type
+    lr_scheduler_type: Union[SchedulerType, str] = field(
+        default="cosine",
+        metadata={"help": "linear, constant, cosine"},
+    )
+    # warm ratio
+    warmup_ratio: float = field(
+        default=0.02, metadata={"help": "Linear warmup over warmup_ratio fraction of total steps."}
+    )
     # epochs
     num_train_epochs: float = field(default=3.0, metadata={"help": "Total number of training epochs to perform."})
     # label smoothing for CE

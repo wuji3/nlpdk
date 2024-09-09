@@ -11,6 +11,7 @@ from tqdm import tqdm
 
 def parse_args():
     argparser = argparse.ArgumentParser()
+    argparser.add_argument('-fi', '--field', type=str, default="product", help='Field as input of model')
     argparser.add_argument('-tk', '--topk', type=int, default=5, help='Prediction topk')
     argparser.add_argument('-dv', '--device', type=str, default='cuda:0', help='GPU device')
     argparser.add_argument('-od', '--outdir', type=str, default='/home/wuji3/nlpdk/test', help='Output dir')
@@ -42,7 +43,8 @@ def main(args):
     model = AutoModelForSequenceClassification.from_pretrained(pretrained_model_name_or_path=model_path, config=config).to(device)
 
     # data tokenize
-    df = pd.read_csv(predict_file, dtype={'sentence1': 'str'})
+    df = pd.read_csv(predict_file, dtype={args.field: 'str'})
+    df.rename(columns={args.field: "sentence1"}, inplace = True)
     df = df[df['sentence1'].apply(lambda x: isinstance(x, str))]
     text = df['sentence1'].tolist()
 
