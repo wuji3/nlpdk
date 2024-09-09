@@ -11,11 +11,12 @@ from tqdm import tqdm
 
 def parse_args():
     argparser = argparse.ArgumentParser()
-    argparser.add_argument('-fi', '--field', type=str, default="product", help='Field as input of model')
+    argparser.add_argument('-i', '--inp', type=str, default="product", help='Field as input of model')
     argparser.add_argument('-tk', '--topk', type=int, default=5, help='Prediction topk')
     argparser.add_argument('-dv', '--device', type=str, default='cuda:0', help='GPU device')
     argparser.add_argument('-od', '--outdir', type=str, default='/home/wuji3/nlpdk/test', help='Output dir')
     argparser.add_argument('-f', '--predictf', type=str, default='/home/wuji3/dkdata/iter1data/train_debug.csv', help='Which file to predict')
+    argparser.add_argument('-fi', '--field', nargs='+', default=[], help='Field with sentence1')
     argparser.add_argument('-m', '--model', type=str, default='/home/wuji3/nlpdk/test/checkpoint-48')
     argparser.add_argument('-bs', '--bs', type=int, default=512, help='Batch size of predicting')
 
@@ -43,9 +44,9 @@ def main(args):
     model = AutoModelForSequenceClassification.from_pretrained(pretrained_model_name_or_path=model_path, config=config).to(device)
 
     # data tokenize
-    df = pd.read_csv(predict_file, dtype={args.field: 'str'})
-    df.rename(columns={args.field: "sentence1"}, inplace = True)
-    df = df[df['sentence1'].apply(lambda x: isinstance(x, str))]
+    raw_df = pd.read_csv(predict_file, dtype={args.inp: 'str'})
+    raw_df.rename(columns={args.inp: "sentence1"}, inplace = True)
+    df = raw_df[raw_df['sentence1'].apply(lambda x: isinstance(x, str))].copy()
     text = df['sentence1'].tolist()
 
     with torch.inference_mode():
@@ -81,6 +82,8 @@ def main(args):
         data.append(row)
 
     df = pd.DataFrame(data, columns=["sentence1"] + [f"top{i+1}" for i in range(topk)] + ['score'])
+    fields = ['sentence1'] + [*args.field]
+    df = pd.merge(df, raw_df[fields], how='left', on='sentence1')
     df.to_csv(output_predict_file, index=False)
 
 if __name__ == '__main__':
